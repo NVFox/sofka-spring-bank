@@ -10,6 +10,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -28,8 +30,12 @@ public class Transaction {
     @CreationTimestamp
     private LocalDateTime date;
 
+    @ManyToOne
+    @JoinColumn(name = "account_id")
+    private Account account;
+
     @Entity
-    @Table(name = "transaction-actions")
+    @Table(name = "transaction_actions")
     public static class Action {
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -54,6 +60,10 @@ public class Transaction {
             this.name = name;
         }
     }
+
+    @ManyToOne
+    @JoinColumn(name = "action_id")
+    private Action action;
 
     public int getId() {
         return id;
@@ -85,5 +95,21 @@ public class Transaction {
 
     public void setDate(LocalDateTime date) {
         this.date = date;
+    }
+
+    public Account getAccount() {
+        return account;
+    }
+
+    public void setAccount(Account account) {
+        this.account = account;
+    }
+
+    public Action getAction() {
+        return action;
+    }
+
+    public void setAction(Action action) {
+        this.action = action;
     }
 }

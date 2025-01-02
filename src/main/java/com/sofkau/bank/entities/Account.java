@@ -8,6 +8,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
@@ -23,8 +25,12 @@ public class Account {
 
     private BigDecimal balance;
 
+    @ManyToOne
+    @JoinColumn(name = "client_id")
+    private Client client;
+
     @Entity
-    @Table(name = "account-types")
+    @Table(name = "account_types")
     public static class Type {
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -49,6 +55,10 @@ public class Account {
             this.name = name;
         }
     }
+
+    @ManyToOne
+    @JoinColumn(name = "type_id")
+    private Type type;
 
     @PrePersist
     public void init() {
@@ -79,5 +89,21 @@ public class Account {
 
     public void setBalance(BigDecimal balance) {
         this.balance = balance;
+    }
+
+    public Client getClient() {
+        return client;
+    }
+
+    public void setClient(Client client) {
+        this.client = client;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
     }
 }
