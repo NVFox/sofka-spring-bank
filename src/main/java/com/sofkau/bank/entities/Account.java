@@ -3,6 +3,9 @@ package com.sofkau.bank.entities;
 import java.math.BigDecimal;
 import java.util.UUID;
 
+import com.sofkau.bank.exceptions.account.NegativeAmountException;
+import com.sofkau.bank.exceptions.account.NotEnoughFundsException;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -28,6 +31,9 @@ public class Account {
     @ManyToOne
     @JoinColumn(name = "client_id")
     private Client client;
+
+    public Account() {
+    }
 
     @Entity
     @Table(name = "account_types")
@@ -60,11 +66,38 @@ public class Account {
     @JoinColumn(name = "type_id")
     private Type type;
 
+    public Account(Type type, BigDecimal balance) {
+        this.type = type;
+        this.balance = balance;
+    }
+
     @PrePersist
     public void init() {
         number = number == null
                 ? UUID.randomUUID()
                 : number;
+    }
+
+    public void depositFunds(BigDecimal amount) {
+        if (amount.compareTo(BigDecimal.ZERO) < 0)
+            throw new NegativeAmountException();
+
+        balance = balance.add(amount);
+    }
+
+    public void withdrawFunds(BigDecimal amount) {
+        if (amount.compareTo(BigDecimal.ZERO) < 0)
+            throw new NegativeAmountException();
+
+        if (balance.compareTo(amount) < 0)
+            throw new NotEnoughFundsException();
+
+        balance = balance.subtract(amount);
+    }
+
+    public void transferFunds(BigDecimal amount, Account to) {
+        this.withdrawFunds(amount);
+        to.depositFunds(amount);
     }
 
     public int getId() {

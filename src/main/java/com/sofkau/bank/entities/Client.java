@@ -1,5 +1,7 @@
 package com.sofkau.bank.entities;
 
+import java.math.BigDecimal;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -61,6 +63,14 @@ public class Client {
 
     public static Builder from(User user) {
         return new Builder(user);
+    }
+
+    public Account createAccount(Account.Type type) {
+        return createAccount(type, BigDecimal.ZERO);
+    }
+
+    public Account createAccount(Account.Type type, BigDecimal amount) {
+        return new Account(type, amount);
     }
 
     public int getId() {
