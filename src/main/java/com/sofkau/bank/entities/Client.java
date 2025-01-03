@@ -70,7 +70,7 @@ public class Client {
     }
 
     public Account createAccount(Account.Type type, BigDecimal amount) {
-        return new Account(type, amount);
+        return new Account(type, this, amount);
     }
 
     public int getId() {

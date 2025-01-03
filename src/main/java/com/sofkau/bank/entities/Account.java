@@ -66,8 +66,9 @@ public class Account {
     @JoinColumn(name = "type_id")
     private Type type;
 
-    public Account(Type type, BigDecimal balance) {
+    public Account(Type type, Client client, BigDecimal balance) {
         this.type = type;
+        this.client = client;
         this.balance = balance;
     }
 
