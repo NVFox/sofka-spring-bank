@@ -24,25 +24,18 @@ public class User {
     public User() {
     }
 
-    private User(int id, String name, String email, String password) {
-        this.id = id;
+    public User(String name, String email, String password) {
         this.name = name;
         this.email = email;
         this.password = password;
     }
 
     public static class Builder {
-        private int id;
         private String name;
         private String email;
         private String password;
 
         private Builder() {
-        }
-
-        public Builder id(int id) {
-            this.id = id;
-            return this;
         }
 
         public Builder name(String name) {
@@ -61,7 +54,7 @@ public class User {
         }
 
         public User build() {
-            return new User(id, name, email, password);
+            return new User(name, email, password);
         }
     }
 

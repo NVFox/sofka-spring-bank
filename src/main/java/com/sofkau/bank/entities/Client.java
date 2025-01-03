@@ -26,6 +26,43 @@ public class Client {
     @JoinColumn(name = "user_id")
     private User user;
 
+    public Client() {
+    }
+
+    public Client(String firstName, String lastName, User user) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.user = user;
+    }
+
+    public static class Builder {
+        private User user;
+        private String firstName;
+        private String lastName;
+
+        private Builder(User user) {
+            this.user = user;
+        }
+
+        public Builder firstName(String firstName) {
+            this.firstName = firstName.trim();
+            return this;
+        }
+
+        public Builder lastName(String lastName) {
+            this.lastName = lastName.trim();
+            return this;
+        }
+
+        public Client build() {
+            return new Client(firstName, lastName, user);
+        }
+    }
+
+    public static Builder from(User user) {
+        return new Builder(user);
+    }
+
     public int getId() {
         return id;
     }
