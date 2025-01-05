@@ -2,11 +2,14 @@ package com.sofkau.bank.services.clients;
 
 import java.util.Optional;
 
+import org.springframework.stereotype.Service;
+
 import com.sofkau.bank.entities.Client;
 import com.sofkau.bank.exceptions.AlreadyExistsException;
 import com.sofkau.bank.exceptions.NotFoundException;
 import com.sofkau.bank.repositories.ClientRepository;
 
+@Service
 public class ClientServiceImpl implements ClientService {
     private final ClientRepository clientRepository;
 
