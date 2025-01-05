@@ -21,6 +21,47 @@ public class User {
 
     private String password;
 
+    public User() {
+    }
+
+    public User(String name, String email, String password) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
+    }
+
+    public static class Builder {
+        private String name;
+        private String email;
+        private String password;
+
+        private Builder() {
+        }
+
+        public Builder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder email(String email) {
+            this.email = email;
+            return this;
+        }
+
+        public Builder password(String password) {
+            this.password = password;
+            return this;
+        }
+
+        public User build() {
+            return new User(name, email, password);
+        }
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public int getId() {
         return id;
     }
