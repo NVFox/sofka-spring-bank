@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.sofkau.bank.entities.Transaction.Action.Name;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -44,6 +46,10 @@ public class Transaction {
         @Column(unique = true)
         private String name;
 
+        public enum Name {
+            DEPOSIT, WITHDRAWAL, SENT_TRANSFER, RECEIVED_TRANSFER
+        }
+
         public int getId() {
             return id;
         }
@@ -64,6 +70,36 @@ public class Transaction {
     @ManyToOne
     @JoinColumn(name = "action_id")
     private Action action;
+
+    public Transaction(Action action, Account account) {
+        this.action = action;
+        this.account = account;
+    }
+
+    public static class Builder {
+        private final Account account;
+
+        private Builder(Account account) {
+            this.account = account;
+        }
+
+        public Transaction by(Action action, BigDecimal amount) {
+            Action.Name actionName = Name.valueOf(action.name);
+            Transaction transaction = new Transaction(action, account);
+
+            transaction.previousBalance = account.getBalance();
+            transaction.currentBalance = switch (actionName) {
+                case DEPOSIT, RECEIVED_TRANSFER -> account.getBalance().add(amount);
+                case WITHDRAWAL, SENT_TRANSFER -> account.getBalance().subtract(amount);
+            };
+
+            return transaction;
+        }
+    }
+
+    public static Builder on(Account account) {
+        return new Builder(account);
+    }
 
     public int getId() {
         return id;
