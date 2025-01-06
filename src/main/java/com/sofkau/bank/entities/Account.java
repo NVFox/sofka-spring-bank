@@ -45,6 +45,10 @@ public class Account {
         @Column(unique = true)
         private String name;
 
+        public enum Name {
+            CHECKING, SAVINGS
+        }
+
         public int getId() {
             return id;
         }
