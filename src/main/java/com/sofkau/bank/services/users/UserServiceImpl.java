@@ -4,7 +4,6 @@ import org.springframework.stereotype.Service;
 
 import com.sofkau.bank.entities.User;
 import com.sofkau.bank.exceptions.AlreadyExistsException;
-import com.sofkau.bank.exceptions.NotFoundException;
 import com.sofkau.bank.repositories.UserRepository;
 
 @Service
@@ -21,11 +20,5 @@ public class UserServiceImpl implements UserService {
             throw new AlreadyExistsException();
 
         return userRepository.save(user);
-    }
-
-    @Override
-    public User findUserByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(NotFoundException::new);
     }
 }
