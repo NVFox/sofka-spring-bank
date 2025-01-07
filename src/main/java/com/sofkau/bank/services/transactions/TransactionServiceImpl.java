@@ -1,10 +1,10 @@
 package com.sofkau.bank.services.transactions;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
-import com.sofkau.bank.entities.Account;
 import com.sofkau.bank.entities.Transaction;
 import com.sofkau.bank.entities.Transaction.Action;
 import com.sofkau.bank.exceptions.AlreadyExistsException;
@@ -44,7 +44,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public List<Transaction> findAccountTransactions(Account account) {
-        return transactionRepository.findAllByAccount(account);
+    public List<Transaction> findTransactionsByAccountNumber(UUID number) {
+        return transactionRepository.findAllByAccountNumber(number);
     }
 }
