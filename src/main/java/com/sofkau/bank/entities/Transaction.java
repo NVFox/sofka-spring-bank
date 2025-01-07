@@ -36,6 +36,9 @@ public class Transaction {
     @JoinColumn(name = "account_id")
     private Account account;
 
+    public Transaction() {
+    }
+
     @Entity
     @Table(name = "transaction_actions")
     public static class Action {
