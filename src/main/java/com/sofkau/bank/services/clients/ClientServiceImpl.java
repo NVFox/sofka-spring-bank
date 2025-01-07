@@ -3,6 +3,7 @@ package com.sofkau.bank.services.clients;
 import org.springframework.stereotype.Service;
 
 import com.sofkau.bank.entities.Client;
+import com.sofkau.bank.entities.User;
 import com.sofkau.bank.exceptions.AlreadyExistsException;
 import com.sofkau.bank.exceptions.NotFoundException;
 import com.sofkau.bank.repositories.ClientRepository;
@@ -19,11 +20,15 @@ public class ClientServiceImpl implements ClientService {
     }
 
     public Client createClient(Client client) {
-        if (client.getId() > 0)
+        User user = client.getUser();
+
+        if (user == null)
+            throw new NotFoundException();
+
+        if (clientRepository.existsByUserEmail(user.getEmail()))
             throw new AlreadyExistsException();
 
-        client.setUser(userService
-                .createUser(client.getUser()));
+        client.setUser(userService.createUser(user));
 
         return clientRepository.save(client);
     }
