@@ -14,5 +14,7 @@ public interface AccountService {
 
     Type findAccountTypeByName(Type.Name name);
 
+    Account findAccountByNumber(UUID number);
+
     List<Account> findClientAccounts(Client client);
 }
