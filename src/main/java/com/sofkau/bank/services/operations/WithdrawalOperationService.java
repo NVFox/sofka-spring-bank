@@ -5,13 +5,14 @@ import java.math.BigDecimal;
 import org.springframework.stereotype.Service;
 
 import com.sofkau.bank.commands.WithdrawalCommand;
+import com.sofkau.bank.constants.OperationTypes;
 import com.sofkau.bank.entities.Account;
 import com.sofkau.bank.entities.Transaction;
 import com.sofkau.bank.entities.Transaction.Action;
 import com.sofkau.bank.services.accounts.AccountService;
 import com.sofkau.bank.services.transactions.TransactionService;
 
-@Service
+@Service(OperationTypes.WITHDRAWAL)
 public class WithdrawalOperationService implements OperationService<WithdrawalCommand> {
     private TransactionService transactionService;
     private AccountService accountService;
