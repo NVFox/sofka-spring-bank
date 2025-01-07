@@ -39,7 +39,8 @@ public class AccountServiceImpl implements AccountService {
         if (account.getClient() == null)
             throw new NotFoundException();
 
-        Account stored = findAccountByNumber(number);
+        Account stored = accountRepository.findByNumber(number)
+                .orElseThrow(NotFoundException::new);
 
         stored.setType(account.getType());
         stored.setClient(account.getClient());
@@ -53,12 +54,6 @@ public class AccountServiceImpl implements AccountService {
         String typeName = name.name();
 
         return accountTypeRepository.findByName(typeName)
-                .orElseThrow(NotFoundException::new);
-    }
-
-    @Override
-    public Account findAccountByNumber(UUID number) {
-        return accountRepository.findByNumber(number)
                 .orElseThrow(NotFoundException::new);
     }
 
