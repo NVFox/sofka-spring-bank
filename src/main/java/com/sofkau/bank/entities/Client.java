@@ -2,6 +2,7 @@ package com.sofkau.bank.entities;
 
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.Collections;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -115,12 +116,12 @@ public class Client implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        return Collections.emptyList();
     }
 
     @Override
     public String getUsername() {
-        return user.getName();
+        return user.getEmail();
     }
 
     @Override

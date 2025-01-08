@@ -5,6 +5,7 @@ import com.sofkau.bank.http.requests.CreateClientRequest;
 import com.sofkau.bank.http.responses.ClientResponse;
 import com.sofkau.bank.services.users.auth.UserAuthService;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,7 +19,7 @@ public class UserAuthController {
     }
 
     @PostMapping("/signup")
-    public ClientResponse signup(CreateClientRequest clientRequest) {
+    public ClientResponse signup(@RequestBody CreateClientRequest clientRequest) {
         Client client = clientRequest.toClient();
         return ClientResponse.from(userAuthService.signup(client));
     }
