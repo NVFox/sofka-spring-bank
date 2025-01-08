@@ -2,10 +2,8 @@ package com.sofkau.bank.controllers;
 
 import java.util.List;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 import com.sofkau.bank.entities.Account;
 import com.sofkau.bank.entities.Client;
@@ -25,11 +23,11 @@ public class AccountController {
     }
 
     @PostMapping
-    public AccountResponse createAccount(CreateAccountRequest accountRequest) {
+    public AccountResponse createAccount(
+            @RequestBody CreateAccountRequest accountRequest,
+            @AuthenticationPrincipal Client client) {
         Type type = accountService
                 .findAccountTypeByName(accountRequest.type());
-
-        Client client = Client.from(User.builder().build()).build(); // TODO: should be logged in client
 
         Account account = accountRequest.toAccount(type, client);
 
@@ -38,9 +36,7 @@ public class AccountController {
     }
 
     @GetMapping
-    public List<AccountResponse> findClientAccounts() {
-        Client client = Client.from(User.builder().build()).build(); // TODO: should be logged in client
-
+    public List<AccountResponse> findClientAccounts(@AuthenticationPrincipal Client client) {
         return accountService.findClientAccounts(client).stream()
                 .map(AccountResponse::from)
                 .toList();
