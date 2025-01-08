@@ -36,13 +36,8 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public void updateAccount(UUID number, Account account) {
-        if (account.getClient() == null)
-            throw new NotFoundException();
-
         Account stored = findAccountByNumber(number);
 
-        stored.setType(account.getType());
-        stored.setClient(account.getClient());
         stored.setBalance(account.getBalance());
 
         accountRepository.save(stored);

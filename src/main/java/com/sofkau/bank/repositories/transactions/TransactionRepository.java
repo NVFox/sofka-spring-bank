@@ -9,7 +9,7 @@ import com.sofkau.bank.entities.Transaction;
 import org.springframework.data.jpa.repository.Query;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Integer> {
-    @Query("SELECT t FROM Transaction t JOIN t.destinationAccount d JOIN t.originAccount o " +
-            "WHERE d.number = :number OR o.number = :number")
+    @Query("SELECT t FROM Transaction t WHERE :number IN " +
+            "(SELECT a.number FROM Account a WHERE a.id IN (t.originAccount.id, t.destinationAccount.id))")
     List<Transaction> findAllByAccountNumber(UUID number);
 }

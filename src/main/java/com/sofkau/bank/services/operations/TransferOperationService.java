@@ -29,29 +29,17 @@ public class TransferOperationService implements OperationService<TransferComman
         Account destination = command.getDestination();
         BigDecimal amount = command.getAmount();
 
-        Action sentTransfer = transactionService
-                .findTransactionActionByName(Action.Name.SENT_TRANSFER);
+        Action transfer = transactionService
+                .findTransactionActionByName(Action.Name.TRANSFER);
 
-        Action receivedTransfer = transactionService
-                .findTransactionActionByName(Action.Name.RECEIVED_TRANSFER);
-
-        Transaction transactionFromOrigin = Transaction.from(origin)
-                .by(sentTransfer, amount);
-
-        Transaction transactionToDestination = Transaction.from(destination)
-                .by(receivedTransfer, amount);
+        Transaction transaction = Transaction.on(origin, destination)
+                .by(transfer, amount);
 
         origin.transferFunds(amount, destination);
 
-        accountService
-                .updateAccount(origin.getNumber(), origin);
+        accountService.updateAccount(origin.getNumber(), origin);
+        accountService.updateAccount(destination.getNumber(), destination);
 
-        accountService
-                .updateAccount(destination.getNumber(), destination);
-
-        transactionService.createTransaction(transactionFromOrigin);
-        transactionService.createTransaction(transactionToDestination);
-
-        return transactionFromOrigin;
+        return transactionService.createTransaction(transaction);
     }
 }

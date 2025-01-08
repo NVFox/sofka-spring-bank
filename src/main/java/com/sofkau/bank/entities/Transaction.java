@@ -23,13 +23,7 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "previous_balance")
-    private BigDecimal previousBalance;
-
     private BigDecimal amount;
-
-    @Column(name = "new_balance")
-    private BigDecimal newBalance;
 
     private String description;
 
@@ -58,7 +52,7 @@ public class Transaction {
         private String name;
 
         public enum Name {
-            DEPOSIT, WITHDRAWAL, SENT_TRANSFER, RECEIVED_TRANSFER
+            DEPOSIT, WITHDRAWAL, TRANSFER
         }
 
         public int getId() {
@@ -101,27 +95,18 @@ public class Transaction {
             Action.Name actionName = Name.valueOf(action.name);
             Transaction transaction = new Transaction(action, origin, destination);
 
-            Account subject = switch (actionName) {
-                case DEPOSIT, RECEIVED_TRANSFER -> destination;
-                case WITHDRAWAL, SENT_TRANSFER -> origin;
-            };
-
-            BigDecimal balance = subject.getBalance();
-
-            transaction.description = descriptionBy(actionName, subject);
+            transaction.description = descriptionBy(actionName);
             transaction.amount = amount;
-            transaction.previousBalance = balance;
-            transaction.newBalance = subject == destination ? balance.add(amount) : balance.subtract(amount);
 
             return transaction;
         }
 
-        private String descriptionBy(Action.Name actionName, Account subject) {
+        private String descriptionBy(Action.Name actionName) {
             return switch (actionName) {
-                case DEPOSIT -> "Successful deposit to account " + subject.getNumber();
-                case WITHDRAWAL -> "Successful withdrawal from account " + subject.getNumber();
-                case SENT_TRANSFER -> "Successful transfer to account " + subject.getNumber();
-                case RECEIVED_TRANSFER -> "Successful transfer from account " + subject.getNumber();
+                case DEPOSIT -> "Successful deposit to account " + destination.getNumber();
+                case WITHDRAWAL -> "Successful withdrawal from account " + origin.getNumber();
+                case TRANSFER -> "Successful transfer from account " +
+                        origin.getNumber() + " to account " + destination.getNumber();
             };
         }
     }
@@ -146,28 +131,12 @@ public class Transaction {
         this.id = id;
     }
 
-    public BigDecimal getPreviousBalance() {
-        return previousBalance;
-    }
-
-    public void setPreviousBalance(BigDecimal balance) {
-        this.previousBalance = balance;
-    }
-
     public BigDecimal getAmount() {
         return amount;
     }
 
     public void setAmount(BigDecimal amount) {
         this.amount = amount;
-    }
-
-    public BigDecimal getNewBalance() {
-        return newBalance;
-    }
-
-    public void setNewBalance(BigDecimal balance) {
-        this.newBalance = balance;
     }
 
     public String getDescription() {
