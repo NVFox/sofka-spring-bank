@@ -24,7 +24,7 @@ public class TransferOperationService implements OperationService<TransferComman
         this.accountService = accountService;
     }
 
-    public void process(TransferCommand command) {
+    public Transaction process(TransferCommand command) {
         Account origin = command.getOrigin();
         Account destination = command.getDestination();
         BigDecimal amount = command.getAmount();
@@ -35,10 +35,10 @@ public class TransferOperationService implements OperationService<TransferComman
         Action receivedTransfer = transactionService
                 .findTransactionActionByName(Action.Name.RECEIVED_TRANSFER);
 
-        Transaction transactionFromOrigin = Transaction.on(origin)
+        Transaction transactionFromOrigin = Transaction.from(origin)
                 .by(sentTransfer, amount);
 
-        Transaction transactionToDestination = Transaction.on(destination)
+        Transaction transactionToDestination = Transaction.from(destination)
                 .by(receivedTransfer, amount);
 
         origin.transferFunds(amount, destination);
@@ -51,5 +51,7 @@ public class TransferOperationService implements OperationService<TransferComman
 
         transactionService.createTransaction(transactionFromOrigin);
         transactionService.createTransaction(transactionToDestination);
+
+        return transactionFromOrigin;
     }
 }

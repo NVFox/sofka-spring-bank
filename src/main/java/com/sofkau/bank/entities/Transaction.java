@@ -23,18 +23,26 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "previous-balance")
+    @Column(name = "previous_balance")
     private BigDecimal previousBalance;
 
-    @Column(name = "current-balance")
-    private BigDecimal currentBalance;
+    private BigDecimal amount;
+
+    @Column(name = "new_balance")
+    private BigDecimal newBalance;
+
+    private String description;
 
     @CreationTimestamp
     private LocalDateTime date;
 
     @ManyToOne
-    @JoinColumn(name = "account_id")
-    private Account account;
+    @JoinColumn(name = "origin_id")
+    private Account originAccount;
+
+    @ManyToOne
+    @JoinColumn(name = "destination_id")
+    private Account destinationAccount;
 
     public Transaction() {
     }
@@ -74,34 +82,60 @@ public class Transaction {
     @JoinColumn(name = "action_id")
     private Action action;
 
-    public Transaction(Action action, Account account) {
+    public Transaction(Action action, Account origin, Account destination) {
         this.action = action;
-        this.account = account;
+        this.originAccount = origin;
+        this.destinationAccount = destination;
     }
 
     public static class Builder {
-        private final Account account;
+        private final Account destination;
+        private final Account origin;
 
-        private Builder(Account account) {
-            this.account = account;
+        private Builder(Account origin, Account destination) {
+            this.origin = origin;
+            this.destination = destination;
         }
 
         public Transaction by(Action action, BigDecimal amount) {
             Action.Name actionName = Name.valueOf(action.name);
-            Transaction transaction = new Transaction(action, account);
+            Transaction transaction = new Transaction(action, origin, destination);
 
-            transaction.previousBalance = account.getBalance();
-            transaction.currentBalance = switch (actionName) {
-                case DEPOSIT, RECEIVED_TRANSFER -> account.getBalance().add(amount);
-                case WITHDRAWAL, SENT_TRANSFER -> account.getBalance().subtract(amount);
+            Account subject = switch (actionName) {
+                case DEPOSIT, RECEIVED_TRANSFER -> destination;
+                case WITHDRAWAL, SENT_TRANSFER -> origin;
             };
+
+            BigDecimal balance = subject.getBalance();
+
+            transaction.description = descriptionBy(actionName, subject);
+            transaction.amount = amount;
+            transaction.previousBalance = balance;
+            transaction.newBalance = subject == destination ? balance.add(amount) : balance.subtract(amount);
 
             return transaction;
         }
+
+        private String descriptionBy(Action.Name actionName, Account subject) {
+            return switch (actionName) {
+                case DEPOSIT -> "Successful deposit to account " + subject.getNumber();
+                case WITHDRAWAL -> "Successful withdrawal from account " + subject.getNumber();
+                case SENT_TRANSFER -> "Successful transfer to account " + subject.getNumber();
+                case RECEIVED_TRANSFER -> "Successful transfer from account " + subject.getNumber();
+            };
+        }
     }
 
-    public static Builder on(Account account) {
-        return new Builder(account);
+    public static Builder from(Account origin) {
+        return new Builder(origin, null);
+    }
+
+    public static Builder to(Account destination) {
+        return new Builder(null, destination);
+    }
+
+    public static Builder on(Account origin, Account destination) {
+        return new Builder(origin, destination);
     }
 
     public int getId() {
@@ -120,12 +154,28 @@ public class Transaction {
         this.previousBalance = balance;
     }
 
-    public BigDecimal getCurrentBalance() {
-        return currentBalance;
+    public BigDecimal getAmount() {
+        return amount;
     }
 
-    public void setCurrentBalance(BigDecimal balance) {
-        this.currentBalance = balance;
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
+    }
+
+    public BigDecimal getNewBalance() {
+        return newBalance;
+    }
+
+    public void setNewBalance(BigDecimal balance) {
+        this.newBalance = balance;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public LocalDateTime getDate() {
@@ -136,12 +186,20 @@ public class Transaction {
         this.date = date;
     }
 
-    public Account getAccount() {
-        return account;
+    public Account getOriginAccount() {
+        return originAccount;
     }
 
-    public void setAccount(Account account) {
-        this.account = account;
+    public void setOriginAccount(Account account) {
+        this.originAccount = account;
+    }
+
+    public Account getDestinationAccount() {
+        return destinationAccount;
+    }
+
+    public void setDestinationAccount(Account account) {
+        this.destinationAccount = account;
     }
 
     public Action getAction() {

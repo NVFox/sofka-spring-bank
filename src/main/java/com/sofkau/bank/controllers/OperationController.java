@@ -2,12 +2,10 @@ package com.sofkau.bank.controllers;
 
 import java.util.UUID;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sofkau.bank.commands.DepositCommand;
@@ -18,6 +16,7 @@ import com.sofkau.bank.factories.OperationServiceFactory;
 import com.sofkau.bank.http.requests.DepositRequest;
 import com.sofkau.bank.http.requests.TransferRequest;
 import com.sofkau.bank.http.requests.WithdrawalRequest;
+import com.sofkau.bank.http.responses.TransactionResponse;
 import com.sofkau.bank.services.accounts.AccountService;
 import com.sofkau.bank.services.operations.OperationService;
 
@@ -35,8 +34,7 @@ public class OperationController {
     }
 
     @PatchMapping("/deposit/account/{number}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void depositFundsToAccount(
+    public TransactionResponse depositFundsToAccount(
             @PathVariable("number") UUID accountNumber,
             @RequestBody DepositRequest depositRequest) {
         Account destination = accountService.findAccountByNumber(accountNumber);
@@ -46,12 +44,11 @@ public class OperationController {
 
         OperationService<DepositCommand> deposit = operations.from(depositCommand);
 
-        deposit.process(depositCommand);
+        return TransactionResponse.from(deposit.process(depositCommand));
     }
 
     @PatchMapping("/withdrawal/account/{number}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void withdrawFundsFromAccount(
+    public TransactionResponse withdrawFundsFromAccount(
             @PathVariable("number") UUID accountNumber,
             @RequestBody WithdrawalRequest withdrawalRequest) {
         Account origin = accountService.findAccountByNumber(accountNumber);
@@ -61,12 +58,11 @@ public class OperationController {
 
         OperationService<WithdrawalCommand> withdrawal = operations.from(withdrawalCommand);
 
-        withdrawal.process(withdrawalCommand);
+        return TransactionResponse.from(withdrawal.process(withdrawalCommand));
     }
 
     @PatchMapping("/transfer/account/{number}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void transferFundsFromAccount(
+    public TransactionResponse transferFundsFromAccount(
             @PathVariable("number") UUID accountNumber,
             @RequestBody TransferRequest transferRequest) {
         Account origin = accountService.findAccountByNumber(accountNumber);
@@ -79,6 +75,6 @@ public class OperationController {
 
         OperationService<TransferCommand> transfer = operations.from(transferCommand);
 
-        transfer.process(transferCommand);
+        return TransactionResponse.from(transfer.process(transferCommand));
     }
 }

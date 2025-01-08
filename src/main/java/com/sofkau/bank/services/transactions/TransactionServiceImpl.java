@@ -26,7 +26,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public Transaction createTransaction(Transaction transaction) {
-        if (transaction.getAccount() == null)
+        if (transaction.getDestinationAccount() == null)
             throw new NotFoundException();
 
         if (transaction.getId() > 0)

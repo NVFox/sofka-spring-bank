@@ -24,14 +24,14 @@ public class WithdrawalOperationService implements OperationService<WithdrawalCo
         this.accountService = accountService;
     }
 
-    public void process(WithdrawalCommand command) {
+    public Transaction process(WithdrawalCommand command) {
         Account origin = command.getOrigin();
         BigDecimal amount = command.getAmount();
 
         Action withdrawal = transactionService
                 .findTransactionActionByName(Action.Name.WITHDRAWAL);
 
-        Transaction transaction = Transaction.on(origin)
+        Transaction transaction = Transaction.from(origin)
                 .by(withdrawal, amount);
 
         origin.withdrawFunds(amount);
@@ -39,6 +39,6 @@ public class WithdrawalOperationService implements OperationService<WithdrawalCo
         accountService
                 .updateAccount(origin.getNumber(), origin);
 
-        transactionService.createTransaction(transaction);
+        return transactionService.createTransaction(transaction);
     }
 }

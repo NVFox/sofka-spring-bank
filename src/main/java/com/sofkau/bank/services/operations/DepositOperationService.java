@@ -24,14 +24,14 @@ public class DepositOperationService implements OperationService<DepositCommand>
         this.accountService = accountService;
     }
 
-    public void process(DepositCommand command) {
+    public Transaction process(DepositCommand command) {
         Account destination = command.getDestination();
         BigDecimal amount = command.getAmount();
 
         Action deposit = transactionService
                 .findTransactionActionByName(Action.Name.DEPOSIT);
 
-        Transaction transaction = Transaction.on(destination)
+        Transaction transaction = Transaction.to(destination)
                 .by(deposit, amount);
 
         destination.depositFunds(amount);
@@ -39,6 +39,6 @@ public class DepositOperationService implements OperationService<DepositCommand>
         accountService
                 .updateAccount(destination.getNumber(), destination);
 
-        transactionService.createTransaction(transaction);
+        return transactionService.createTransaction(transaction);
     }
 }
