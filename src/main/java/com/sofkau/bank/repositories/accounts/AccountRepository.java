@@ -10,6 +10,8 @@ import com.sofkau.bank.entities.Account;
 import com.sofkau.bank.entities.Client;
 
 public interface AccountRepository extends JpaRepository<Account, Integer> {
+    boolean existsByNumberAndClient(UUID number, Client client);
+
     Optional<Account> findByNumber(UUID number);
 
     List<Account> findAllByClient(Client client);

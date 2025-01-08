@@ -2,6 +2,9 @@ package com.sofkau.bank.controllers;
 
 import java.util.UUID;
 
+import com.sofkau.bank.entities.Client;
+import com.sofkau.bank.exceptions.UnauthorizedAccessException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -50,7 +53,11 @@ public class OperationController {
     @PatchMapping("/withdrawal/account/{number}")
     public TransactionResponse withdrawFundsFromAccount(
             @PathVariable("number") UUID accountNumber,
-            @RequestBody WithdrawalRequest withdrawalRequest) {
+            @RequestBody WithdrawalRequest withdrawalRequest,
+            @AuthenticationPrincipal Client client) {
+        if (!accountService.accountBelongsToClient(accountNumber, client))
+            throw new UnauthorizedAccessException();
+
         Account origin = accountService.findAccountByNumber(accountNumber);
 
         WithdrawalCommand withdrawalCommand = WithdrawalCommand.on(origin)
@@ -64,7 +71,11 @@ public class OperationController {
     @PatchMapping("/transfer/account/{number}")
     public TransactionResponse transferFundsFromAccount(
             @PathVariable("number") UUID accountNumber,
-            @RequestBody TransferRequest transferRequest) {
+            @RequestBody TransferRequest transferRequest,
+            @AuthenticationPrincipal Client client) {
+        if (!accountService.accountBelongsToClient(accountNumber, client))
+            throw new UnauthorizedAccessException();
+
         Account origin = accountService.findAccountByNumber(accountNumber);
 
         Account destination = accountService

@@ -63,6 +63,11 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public boolean accountBelongsToClient(UUID number, Client client) {
+        return accountRepository.existsByNumberAndClient(number, client);
+    }
+
+    @Override
     public List<Account> findClientAccounts(Client client) {
         return accountRepository.findAllByClient(client);
     }

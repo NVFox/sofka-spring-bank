@@ -1,7 +1,9 @@
 package com.sofkau.bank.controllers;
 
 import java.util.List;
+import java.util.UUID;
 
+import com.sofkau.bank.exceptions.UnauthorizedAccessException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,5 +42,16 @@ public class AccountController {
         return accountService.findClientAccounts(client).stream()
                 .map(AccountResponse::from)
                 .toList();
+    }
+
+    @GetMapping("/{number}")
+    public AccountResponse findClientAccountByNumber(
+            @PathVariable("number") UUID accountNumber,
+            @AuthenticationPrincipal Client client
+    ) {
+        if (!accountService.accountBelongsToClient(accountNumber, client))
+            throw new UnauthorizedAccessException();
+
+        return AccountResponse.from(accountService.findAccountByNumber(accountNumber));
     }
 }
