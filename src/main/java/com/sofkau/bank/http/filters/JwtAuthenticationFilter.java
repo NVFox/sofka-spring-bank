@@ -1,11 +1,10 @@
 package com.sofkau.bank.http.filters;
 
-import com.sofkau.bank.entities.Client;
 import com.sofkau.bank.http.converters.JwtAuthenticationConverter;
-import com.sofkau.bank.services.sessions.SessionService;
+import com.sofkau.bank.services.tokens.BlacklistedTokenService;
+import com.sofkau.bank.utils.jwt.JwtInterpreter;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
@@ -21,23 +20,21 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
-import java.io.IOException;
-
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final AuthenticationConverter authenticationConverter;
     private final UserDetailsService userDetailsService;
-    private final SessionService sessionService;
+    private final BlacklistedTokenService blacklistedTokenService;
 
     private final HandlerExceptionResolver handlerExceptionResolver;
 
     private JwtAuthenticationFilter(
             JwtAuthenticationConverter authenticationConverter,
-            UserDetailsService userDetailsService, SessionService sessionService,
+            UserDetailsService userDetailsService, BlacklistedTokenService blacklistedTokenService,
             HandlerExceptionResolver handlerExceptionResolver) {
         this.authenticationConverter = authenticationConverter;
         this.userDetailsService = userDetailsService;
-        this.sessionService = sessionService;
+        this.blacklistedTokenService = blacklistedTokenService;
         this.handlerExceptionResolver = handlerExceptionResolver;
     }
 
@@ -45,7 +42,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,
             @NonNull HttpServletResponse response,
-            @NonNull FilterChain filterChain) throws ServletException, IOException {
+            @NonNull FilterChain filterChain) {
         try {
             Authentication auth = authenticationConverter.convert(request);
 
@@ -54,6 +51,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 filterChain.doFilter(request, response);
                 return;
             }
+
+            if (blacklistedTokenService.isBlacklisted(auth.getName()))
+                filterChain.doFilter(request, response);
 
             UserDetails client = userDetailsService
                     .loadUserByUsername(auth.getName());
@@ -66,12 +66,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             filterChain.doFilter(request, response);
         } catch (Exception e) {
-            if (e instanceof ExpiredJwtException jwt) {
-                String token = request.getHeader(HttpHeaders.AUTHORIZATION).trim()
-                        .substring(7).trim();
+            if (e instanceof ExpiredJwtException) {
+                String token = JwtInterpreter
+                        .extractFromHeader(request.getHeader(HttpHeaders.AUTHORIZATION));
 
-                sessionService.findSessionByToken(token)
-                        .ifPresent(sessionService::markSessionAsBlacklisted);
+                blacklistedTokenService.addToBlacklist(token);
             }
 
             handlerExceptionResolver.resolveException(request, response, null, e);

@@ -25,17 +25,8 @@ public class JwtAuthenticationConverter implements AuthenticationConverter {
 
     @Override
     public Authentication convert(HttpServletRequest request) {
-        String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION) != null
-                ? request.getHeader(HttpHeaders.AUTHORIZATION).trim()
-                : null;
-
-        if (authHeader == null || !StringUtils.startsWithIgnoreCase(authHeader, "Bearer"))
-            return null;
-
-        String jwtToken = authHeader.substring(7).trim();
-
-        if (jwtToken.equalsIgnoreCase("Bearer"))
-            throw new BadCredentialsException("Empty bearer authentication token");
+        String jwtToken = JwtInterpreter
+                .extractFromHeader(request.getHeader(HttpHeaders.AUTHORIZATION));
 
         String userEmail = jwtInterpreter.extractUserEmail(jwtToken);
 

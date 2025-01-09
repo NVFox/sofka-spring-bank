@@ -5,8 +5,11 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
@@ -19,6 +22,21 @@ public class JwtInterpreter {
 
     @Value("${security.jwt.expiration-time}")
     private long expirationTime;
+
+    public static String extractFromHeader(String header) {
+        String authHeader = header != null ? header.trim() : null;
+
+        if (authHeader == null ||
+                !StringUtils.startsWithIgnoreCase(authHeader, "Bearer"))
+            return null;
+
+        String jwtToken = authHeader.substring(7).trim();
+
+        if (jwtToken.equalsIgnoreCase("Bearer"))
+            throw new BadCredentialsException("Empty bearer authentication token");
+
+        return jwtToken;
+    }
 
     public String generateAccessToken(String userEmail) {
         return Jwts.builder()
