@@ -1,6 +1,7 @@
 package com.sofkau.bank.services.users;
 
 import com.sofkau.bank.exceptions.NotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.sofkau.bank.entities.User;
@@ -12,9 +13,11 @@ import java.util.Objects;
 @Service
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -31,7 +34,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(NotFoundException::new);
 
         if (user.getPassword() != null)
-            stored.setPassword(user.getPassword());
+            stored.setPassword(passwordEncoder.encode(user.getPassword()));
 
         if (user.getName() != null)
             stored.setName(user.getName());
