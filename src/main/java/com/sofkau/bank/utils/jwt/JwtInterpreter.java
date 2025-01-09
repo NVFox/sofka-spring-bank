@@ -20,7 +20,7 @@ public class JwtInterpreter {
     @Value("${security.jwt.expiration-time}")
     private long expirationTime;
 
-    public String generateToken(String userEmail) {
+    public String generateAccessToken(String userEmail) {
         return Jwts.builder()
                 .subject(userEmail)
                 .issuedAt(new Date())
@@ -35,6 +35,14 @@ public class JwtInterpreter {
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
         return extractUserEmail(token).equals(userDetails.getUsername());
+    }
+
+    public Date extractIssuedAtDate(String token) {
+        return extractClaim(token, Claims::getIssuedAt);
+    }
+
+    public Date extractExpirationDate(String token) {
+        return extractClaim(token, Claims::getExpiration);
     }
 
     public String extractUserEmail(String token) {

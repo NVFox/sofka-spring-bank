@@ -42,14 +42,6 @@ public class SecurityConfig  {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .logout(logout ->
-                        logout
-                                .logoutUrl("/user/auth/logout")
-                                .logoutSuccessHandler((request, response, auth) ->
-                                        response.setStatus(HttpStatus.NO_CONTENT.value()))
-                                .invalidateHttpSession(true)
-                                .deleteCookies("JSESSIONID")
-                )
                 .build();
     }
 }

@@ -1,9 +1,11 @@
 package com.sofkau.bank.services.users.auth;
 
 import com.sofkau.bank.entities.Client;
+import com.sofkau.bank.entities.Session;
 import com.sofkau.bank.entities.User;
 import com.sofkau.bank.exceptions.NotFoundException;
 import com.sofkau.bank.services.clients.ClientService;
+import com.sofkau.bank.services.sessions.jwt.JwtSessionService;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -14,32 +16,42 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserAuthServiceImpl implements UserAuthService, UserDetailsService {
     private final ClientService clientService;
+    private final JwtSessionService sessionService;
+
     private final PasswordEncoder passwordEncoder;
 
-    public UserAuthServiceImpl(ClientService clientService, PasswordEncoder passwordEncoder) {
+    public UserAuthServiceImpl(ClientService clientService, JwtSessionService sessionService, PasswordEncoder passwordEncoder) {
         this.clientService = clientService;
+        this.sessionService = sessionService;
         this.passwordEncoder = passwordEncoder;
     }
 
     @Override
-    public Client signup(Client client) {
+    public Session signup(Client client) {
         User user = client.getUser();
 
         user.setPassword(passwordEncoder
                 .encode(user.getPassword()));
 
-        return clientService.createClient(client);
+        return sessionService
+                .getOrCreateClientSession(clientService.createClient(client));
     }
 
     @Override
-    public Client login(User user) {
+    public Session login(User user) {
         Client client = clientService
                 .findClientByUserEmail(user.getEmail());
 
         if (!passwordEncoder.matches(user.getPassword(), client.getPassword()))
             throw new BadCredentialsException("Wrong password or email");
 
-        return client;
+        return sessionService
+                .getOrCreateClientSession(client);
+    }
+
+    @Override
+    public void logout(Client client) {
+        sessionService.invalidateClientSession(client);
     }
 
     @Override
