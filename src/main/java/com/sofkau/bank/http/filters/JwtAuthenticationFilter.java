@@ -52,8 +52,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
 
-            if (blacklistedTokenService.isBlacklisted(auth.getName()))
+            String jwt = (String) auth.getCredentials();
+
+            if (blacklistedTokenService.isBlacklisted(jwt)) {
                 filterChain.doFilter(request, response);
+                return;
+            }
 
             UserDetails client = userDetailsService
                     .loadUserByUsername(auth.getName());

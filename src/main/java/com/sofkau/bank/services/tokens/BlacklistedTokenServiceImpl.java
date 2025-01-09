@@ -19,6 +19,7 @@ public class BlacklistedTokenServiceImpl implements BlacklistedTokenService {
 
     @Override
     public void addToBlacklist(String token) {
-        blacklistedTokenRepository.save(new BlacklistedToken(token));
+        if (!isBlacklisted(token))
+            blacklistedTokenRepository.save(new BlacklistedToken(token));
     }
 }

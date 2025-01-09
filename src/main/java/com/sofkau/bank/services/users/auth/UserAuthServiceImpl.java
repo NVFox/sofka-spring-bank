@@ -1,11 +1,11 @@
 package com.sofkau.bank.services.users.auth;
 
 import com.sofkau.bank.entities.Client;
-import com.sofkau.bank.entities.Session;
+import com.sofkau.bank.utils.records.Session;
 import com.sofkau.bank.entities.User;
 import com.sofkau.bank.exceptions.NotFoundException;
 import com.sofkau.bank.services.clients.ClientService;
-import com.sofkau.bank.services.sessions.jwt.JwtSessionService;
+import com.sofkau.bank.services.tokens.auth.JwtTokenAuthService;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -16,13 +16,16 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserAuthServiceImpl implements UserAuthService, UserDetailsService {
     private final ClientService clientService;
-    private final JwtSessionService sessionService;
+    private final JwtTokenAuthService jwtTokenAuthService;
 
     private final PasswordEncoder passwordEncoder;
 
-    public UserAuthServiceImpl(ClientService clientService, JwtSessionService sessionService, PasswordEncoder passwordEncoder) {
+    public UserAuthServiceImpl(
+            ClientService clientService,
+            JwtTokenAuthService jwtTokenAuthService,
+            PasswordEncoder passwordEncoder) {
         this.clientService = clientService;
-        this.sessionService = sessionService;
+        this.jwtTokenAuthService = jwtTokenAuthService;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -33,8 +36,8 @@ public class UserAuthServiceImpl implements UserAuthService, UserDetailsService 
         user.setPassword(passwordEncoder
                 .encode(user.getPassword()));
 
-        return sessionService
-                .getOrCreateClientSession(clientService.createClient(client));
+        return jwtTokenAuthService
+                .generateAccessTokenFrom(clientService.createClient(client));
     }
 
     @Override
@@ -45,13 +48,13 @@ public class UserAuthServiceImpl implements UserAuthService, UserDetailsService 
         if (!passwordEncoder.matches(user.getPassword(), client.getPassword()))
             throw new BadCredentialsException("Wrong password or email");
 
-        return sessionService
-                .getOrCreateClientSession(client);
+        return jwtTokenAuthService
+                .generateAccessTokenFrom(client);
     }
 
     @Override
-    public void logout(Client client) {
-        sessionService.invalidateClientSession(client);
+    public void logout(String token) {
+        jwtTokenAuthService.destroyAccessToken(token);
     }
 
     @Override

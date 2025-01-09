@@ -28,6 +28,9 @@ public class JwtAuthenticationConverter implements AuthenticationConverter {
         String jwtToken = JwtInterpreter
                 .extractFromHeader(request.getHeader(HttpHeaders.AUTHORIZATION));
 
+        if (jwtToken == null)
+            return null;
+
         String userEmail = jwtInterpreter.extractUserEmail(jwtToken);
 
         User user = User.builder().email(userEmail).build();
