@@ -5,23 +5,23 @@ import java.time.LocalDateTime;
 
 import com.sofkau.bank.entities.Transaction;
 import com.sofkau.bank.entities.Transaction.Action;
+import com.sofkau.bank.entities.Transaction.Action.Name;
 
 public record TransactionResponse(
         int id,
         Action.Name action,
-        BigDecimal previousBalance,
-        BigDecimal currentBalance,
+        BigDecimal amount,
+        String description,
         LocalDateTime date) {
 
     public static TransactionResponse from(Transaction transaction) {
         Action action = transaction.getAction();
-        Action.Name actionName = Action.Name.valueOf(action.getName());
 
         return new TransactionResponse(
                 transaction.getId(),
-                actionName,
-                transaction.getPreviousBalance(),
-                transaction.getCurrentBalance(),
+                Name.valueOf(action.getName()),
+                transaction.getAmount(),
+                transaction.getDescription(),
                 transaction.getDate());
     }
 }

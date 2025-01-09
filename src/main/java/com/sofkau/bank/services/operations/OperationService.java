@@ -1,5 +1,7 @@
 package com.sofkau.bank.services.operations;
 
+import com.sofkau.bank.entities.Transaction;
+
 public interface OperationService<T> {
-    void process(T payload);
+    Transaction process(T payload);
 }

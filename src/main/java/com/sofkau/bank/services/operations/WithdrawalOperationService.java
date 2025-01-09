@@ -5,13 +5,14 @@ import java.math.BigDecimal;
 import org.springframework.stereotype.Service;
 
 import com.sofkau.bank.commands.WithdrawalCommand;
+import com.sofkau.bank.constants.OperationTypes;
 import com.sofkau.bank.entities.Account;
 import com.sofkau.bank.entities.Transaction;
 import com.sofkau.bank.entities.Transaction.Action;
 import com.sofkau.bank.services.accounts.AccountService;
 import com.sofkau.bank.services.transactions.TransactionService;
 
-@Service
+@Service(OperationTypes.WITHDRAWAL)
 public class WithdrawalOperationService implements OperationService<WithdrawalCommand> {
     private TransactionService transactionService;
     private AccountService accountService;
@@ -23,14 +24,14 @@ public class WithdrawalOperationService implements OperationService<WithdrawalCo
         this.accountService = accountService;
     }
 
-    public void process(WithdrawalCommand command) {
+    public Transaction process(WithdrawalCommand command) {
         Account origin = command.getOrigin();
         BigDecimal amount = command.getAmount();
 
         Action withdrawal = transactionService
                 .findTransactionActionByName(Action.Name.WITHDRAWAL);
 
-        Transaction transaction = Transaction.on(origin)
+        Transaction transaction = Transaction.from(origin)
                 .by(withdrawal, amount);
 
         origin.withdrawFunds(amount);
@@ -38,6 +39,6 @@ public class WithdrawalOperationService implements OperationService<WithdrawalCo
         accountService
                 .updateAccount(origin.getNumber(), origin);
 
-        transactionService.createTransaction(transaction);
+        return transactionService.createTransaction(transaction);
     }
 }
