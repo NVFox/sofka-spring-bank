@@ -33,8 +33,29 @@ public class ClientServiceImpl implements ClientService {
         return clientRepository.save(client);
     }
 
+    @Override
+    public Client updateClient(String email, Client client) {
+        Client stored = findClientByUserEmail(email);
+
+        if (client.getFirstName() != null)
+            stored.setFirstName(client.getFirstName());
+
+        if (client.getLastName() != null)
+            stored.setLastName(client.getLastName());
+
+        stored.setUser(userService.updateUser(email, client.getUser()));
+
+        return clientRepository.save(stored);
+    }
+
     public Client findClientByUserEmail(String email) {
         return clientRepository.findByUserEmail(email)
                 .orElseThrow(NotFoundException::new);
+    }
+
+    @Override
+    public void deleteClientByEmail(String email) {
+        clientRepository.deleteByUserEmail(email);
+        userService.deleteUserByEmail(email);
     }
 }
