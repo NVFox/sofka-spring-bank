@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 
 import com.sofkau.bank.entities.Account;
 
-public class DepositCommand {
+public non-sealed class DepositCommand implements OperationalCommand {
     private final Account destination;
     private final BigDecimal amount;
 

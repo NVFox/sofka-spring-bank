@@ -1,48 +1,57 @@
 package com.sofkau.bank.services.users;
 
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
+import com.sofkau.bank.exceptions.NotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.sofkau.bank.entities.User;
 import com.sofkau.bank.exceptions.AlreadyExistsException;
-import com.sofkau.bank.exceptions.NotFoundException;
 import com.sofkau.bank.repositories.UserRepository;
+
+import java.util.Objects;
 
 @Service
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public User createUser(User user) {
-        if (checkIfUserExists(user))
+        if (userRepository.existsByEmail(user.getEmail()))
             throw new AlreadyExistsException();
 
         return userRepository.save(user);
     }
 
     @Override
-    public User findUserByEmail(String email) {
-        return userRepository.findByEmail(email)
+    public User updateUser(String email, User user) {
+        User stored = userRepository.findByEmail(email)
                 .orElseThrow(NotFoundException::new);
+
+        if (user.getPassword() != null)
+            stored.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        if (user.getName() != null)
+            stored.setName(user.getName());
+
+        if (Objects.equals(email, user.getEmail()))
+            return userRepository.save(stored);
+
+        if (userRepository.existsByEmail(user.getEmail()))
+            throw new AlreadyExistsException();
+
+        stored.setEmail(user.getEmail());
+
+        return userRepository.save(stored);
     }
 
-    private boolean checkIfUserExists(User user) {
-        ExampleMatcher validator = ExampleMatcher.matchingAny()
-                .withMatcher("id", match -> match.exact())
-                .withMatcher("email", match -> match.exact())
-                .withIgnoreNullValues();
-
-        User sample = User.builder()
-                .email(user.getEmail())
-                .build();
-
-        Example<User> example = Example.of(sample, validator);
-
-        return userRepository.exists(example);
+    @Override
+    public void deleteUserByEmail(String email) {
+        userRepository.deleteByEmail(email);
     }
 }

@@ -16,5 +16,7 @@ public interface AccountService {
 
     Account findAccountByNumber(UUID number);
 
+    boolean accountBelongsToClient(UUID number, Client client);
+
     List<Account> findClientAccounts(Client client);
 }

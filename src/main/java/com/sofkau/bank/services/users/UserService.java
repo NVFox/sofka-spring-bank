@@ -4,6 +4,6 @@ import com.sofkau.bank.entities.User;
 
 public interface UserService {
     User createUser(User user);
-
-    User findUserByEmail(String email);
+    User updateUser(String email, User user);
+    void deleteUserByEmail(String email);
 }
