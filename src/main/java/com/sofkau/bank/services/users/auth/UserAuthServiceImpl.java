@@ -4,6 +4,7 @@ import com.sofkau.bank.entities.Client;
 import com.sofkau.bank.entities.User;
 import com.sofkau.bank.exceptions.NotFoundException;
 import com.sofkau.bank.services.clients.ClientService;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -28,6 +29,17 @@ public class UserAuthServiceImpl implements UserAuthService, UserDetailsService 
                 .encode(user.getPassword()));
 
         return clientService.createClient(client);
+    }
+
+    @Override
+    public Client login(User user) {
+        Client client = clientService
+                .findClientByUserEmail(user.getEmail());
+
+        if (!passwordEncoder.matches(user.getPassword(), client.getPassword()))
+            throw new BadCredentialsException("Wrong password or email");
+
+        return client;
     }
 
     @Override
