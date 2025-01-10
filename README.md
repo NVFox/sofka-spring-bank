@@ -93,6 +93,16 @@ Esta clase se puede encontrar en el paquete http/converters: <br />
 
 ---
 
+## Integración con Swagger UI
+
+Adicionalmente, también se agregó swagger, una poderosa herramienta para documentar todos los endpoints de la aplicación.
+Para utilizar la UI de swagger solo es necesario dirigirse a la dirección localhost:8080/swagger-ui/index.html (en caso
+de solo querer consultar información en JSON sobre los endpoints también está disponible la ruta localhost:8080/api-docs).
+
+![swagger-ui.png](src/main/resources/docs/images/swagger-ui.png)
+
+---
+
 ## Inicialización de la Aplicación
 
 Para iniciar la aplicación solo es necesario correr el siguiente comando en una terminal que se encuentre 
