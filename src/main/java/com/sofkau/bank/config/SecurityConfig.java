@@ -33,6 +33,7 @@ public class SecurityConfig  {
                         requests
                                 .requestMatchers("/h2-console").permitAll()
                                 .requestMatchers("/h2-console/**").permitAll()
+                                .requestMatchers("/swagger-ui/**", "/api-docs/**").permitAll()
                                 .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/user/auth/login").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/user/auth/signup").permitAll()
